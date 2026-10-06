@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SNAPLY - Your little moments, captured.</title>
+
+  <!-- Font Google: Fredoka (judul) dan DM Sans (isi) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <!-- 1. Bootstrap CSS (dimuat PERTAMA: hanya untuk container, row, col, btn, card) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- 2. Tailwind CDN (dimuat SETELAH Bootstrap: untuk semua styling visual) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- 3. CSS buatan sendiri (dimuat PALING AKHIR, dibuat di tahap LANJUT CSS) -->
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="font-body bg-gradient-to-br from-pink-100 via-violet-50 to-sky-100 text-violet-950 min-h-screen">
+
+  <!-- ================= NAVBAR ================= -->
+  <header class="container py-3">
+    <div class="flex flex-row items-center justify-between">
+      <a href="#hero" class="font-display text-2xl font-bold text-pink-500 hover:text-violet-600 transition-colors" aria-label="SNAPLY, kembali ke atas">
+        SNAPLY
+      </a>
+      <a href="#photobooth" class="text-sm font-medium text-violet-700 hover:text-pink-500 focus:outline-none focus:ring-2 focus:ring-pink-400 rounded-lg px-3 py-2 transition">
+        Photobooth
+      </a>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ================= 1. LANDING PAGE ================= -->
+    <section id="hero" class="container py-5">
+      <div class="row items-center g-4">
+
+        <!-- Kolom teks -->
+        <div class="col-12 col-lg-6">
+          <p class="inline-block bg-yellow-200 text-violet-900 text-sm font-medium px-4 py-1 rounded-full mb-4">
+            Free online photobooth
+          </p>
+          <h1 class="font-display text-6xl md:text-7xl font-bold text-pink-500 mb-2">SNAPLY</h1>
+          <p class="font-display text-2xl md:text-3xl font-semibold text-violet-700 mb-4">
+            Your little moments, captured.
+          </p>
+          <p class="text-lg text-violet-900/80 mb-6 max-w-md">
+            Turn simple moments into memories. Pilih filter dan frame, ambil 4 foto, lalu unduh photo strip kamu.
+          </p>
+          <button id="startBtn" type="button"
+            class="btn bg-pink-500 text-white font-bold text-lg px-8 py-3 rounded-full shadow-lg hover:bg-violet-600 hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-pink-300 active:scale-95 transition duration-200">
+            Start Photobooth
+          </button>
+        </div>
+
+        <!-- Kolom visual: tiruan photo strip dari HTML + Tailwind -->
+        <div class="col-12 col-lg-6">
+          <div class="flex flex-row justify-center items-center gap-4">
+
+            <div class="bg-white p-3 rounded-2xl shadow-xl flex flex-col gap-2 w-32 md:w-40 -rotate-6">
+              <div class="h-20 md:h-24 rounded-lg bg-gradient-to-br from-pink-300 to-pink-500"></div>
+              <div class="h-20 md:h-24 rounded-lg bg-gradient-to-br from-violet-300 to-violet-500"></div>
+              <div class="h-20 md:h-24 rounded-lg bg-gradient-to-br from-yellow-200 to-orange-400"></div>
+              <div class="h-20 md:h-24 rounded-lg bg-gradient-to-br from-sky-300 to-sky-500"></div>
+              <p class="font-display text-center text-sm font-bold text-pink-500">SNAPLY</p>
+            </div>
+
+            <div class="bg-violet-600 p-3 rounded-2xl shadow-xl flex flex-col gap-2 w-32 md:w-40 rotate-6 mt-8">
+              <div class="h-20 md:h-24 rounded-lg bg-gradient-to-br from-yellow-200 to-pink-400"></div>
+              <div class="h-20 md:h-24 rounded-lg bg-gradient-to-br from-sky-200 to-violet-400"></div>
+              <div class="h-20 md:h-24 rounded-lg bg-gradient-to-br from-pink-200 to-orange-300"></div>
+              <div class="h-20 md:h-24 rounded-lg bg-gradient-to-br from-violet-200 to-sky-400"></div>
+              <p class="font-display text-center text-sm font-bold text-yellow-200">06 OCT 2026</p>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+
+    <!-- ================= 2. AREA PHOTOBOOTH ================= -->
+    <section id="photobooth" class="container py-5">
+      <h2 class="font-display text-4xl font-bold text-violet-700 mb-1">Photobooth</h2>
+      <p class="text-violet-900/70 mb-4">Nyalakan kamera, pilih gaya, lalu ambil 4 foto.</p>
+
+      <!-- Mobile: kamera di atas, controls di bawah. Desktop (lg): kiri-kanan -->
+      <div class="row g-4">
+
+        <!-- ===== KOLOM KIRI: KAMERA ===== -->
+        <div class="col-12 col-lg-7">
+          <div class="card border-0 rounded-3xl shadow-xl p-3 md:p-4">
+
+            <!-- Status kamera + progress -->
+            <div class="flex flex-row items-center justify-between mb-3">
+              <span id="cameraStatus" class="bg-gray-200 text-gray-700 text-sm font-bold px-4 py-1 rounded-full">
+                Camera Off
+              </span>
+              <span id="progressText" class="font-display text-lg font-semibold text-violet-700">
+                Photo 0 of 4
+              </span>
+            </div>
+
+            <!-- Area video: relative supaya countdown dan flash bisa menimpa video -->
+            <div id="cameraBox" class="relative w-full aspect-[4/3] bg-violet-950 rounded-2xl overflow-hidden">
+
+              <video id="video" class="w-full h-full object-cover" autoplay playsinline muted
+                     aria-label="Preview kamera langsung"></video>
+
+              <!-- Tampilan awal sebelum kamera menyala -->
+              <div id="cameraPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center text-center p-4 text-white">
+                <p class="font-display text-2xl font-semibold mb-1">Kamera belum menyala</p>
+                <p class="text-sm text-violet-200">Tekan "Start Camera" untuk memulai.</p>
+              </div>
+
+              <!-- Countdown besar di tengah (disembunyikan dulu) -->
+              <div id="countdown" class="hidden absolute inset-0 flex items-center justify-center pointer-events-none"
+                   aria-live="assertive"></div>
+
+              <!-- Efek flash putih saat foto diambil -->
+              <div id="flash" class="absolute inset-0 bg-white opacity-0 pointer-events-none transition-opacity duration-300"></div>
+            </div>
+
+            <!-- Pesan error / info ramah -->
+            <p id="messageBox" class="hidden mt-3 px-4 py-3 rounded-xl text-sm font-medium bg-red-100 text-red-700" role="alert"></p>
+
+            <!-- Progress bar -->
+            <div class="w-full h-2 bg-gray-200 rounded-full mt-3 overflow-hidden">
+              <div id="progressBar" class="h-full w-0 bg-pink-500 rounded-full transition-all duration-500"></div>
+            </div>
+
+            <!-- 4 slot thumbnail foto -->
+            <div id="thumbnails" class="grid grid-cols-4 gap-2 mt-3">
+              <div class="thumb-slot aspect-[4/3] rounded-lg bg-pink-50 border-2 border-dashed border-pink-300 overflow-hidden flex items-center justify-center text-pink-400 font-bold">1</div>
+              <div class="thumb-slot aspect-[4/3] rounded-lg bg-pink-50 border-2 border-dashed border-pink-300 overflow-hidden flex items-center justify-center text-pink-400 font-bold">2</div>
+              <div class="thumb-slot aspect-[4/3] rounded-lg bg-pink-50 border-2 border-dashed border-pink-300 overflow-hidden flex items-center justify-center text-pink-400 font-bold">3</div>
+              <div class="thumb-slot aspect-[4/3] rounded-lg bg-pink-50 border-2 border-dashed border-pink-300 overflow-hidden flex items-center justify-center text-pink-400 font-bold">4</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== KOLOM KANAN: CONTROLS ===== -->
+        <div class="col-12 col-lg-5">
+          <div class="card border-0 rounded-3xl shadow-xl p-4 flex flex-col gap-4">
+
+            <!-- Tombol kamera -->
+            <button id="startCameraBtn" type="button"
+              class="btn bg-violet-600 text-white font-bold py-3 rounded-2xl hover:bg-violet-700 focus:outline-none focus:ring-4 focus:ring-violet-300 active:scale-95 transition">
+              Start Camera
+            </button>
+
+            <!-- Pilihan timer -->
+            <div>
+              <h3 class="font-display text-lg font-semibold mb-2">Timer</h3>
+              <div id="timerOptions" class="grid grid-cols-3 gap-2">
+                <button type="button" data-timer="3" class="option-btn selected px-2 py-2 rounded-xl text-sm font-medium bg-pink-50 hover:bg-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-400 active:scale-95 transition">3 seconds</button>
+                <button type="button" data-timer="5" class="option-btn px-2 py-2 rounded-xl text-sm font-medium bg-pink-50 hover:bg-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-400 active:scale-95 transition">5 seconds</button>
+                <button type="button" data-timer="10" class="option-btn px-2 py-2 rounded-xl text-sm font-medium bg-pink-50 hover:bg-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-400 active:scale-95 transition">10 seconds</button>
+              </div>
+            </div>
+
+            <!-- Pilihan filter -->
+            <div>
+              <h3 class="font-display text-lg font-semibold mb-2">Filter</h3>
+              <div id="filterOptions" class="grid grid-cols-3 md:grid-cols-4 gap-2">
+                <button type="button" data-filter="normal" class="option-btn selected px-2 py-2 rounded-xl text-sm font-medium bg-pink-50 hover:bg-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-400 active:scale-95 transition">Normal</button>
+                <button type="button" data-filter="warm" class="option-btn px-2 py-2 rounded-xl text-sm font-medium bg-pink-50 hover:bg-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-400 active:scale-95 transition">Warm</button>
+                <button type="button" data-filter="cool" class="option-btn px-2 py-2 rounded-xl text-sm font-medium bg-pink-50 hover:bg-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-400 active:scale-95 transition">Cool</button>
+                <button type="button" data-filter="vintage" class="option-btn px-2 py-2 rounded-xl text-sm font-medium bg-pink-50 hover:bg-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-400 active:scale-95 transition">Vintage</button>
+                <button type="button" data-filter="grayscale" class="option-btn px-2 py-2 rounded-xl text-sm font-medium bg-pink-50 hover:bg-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-400 active:scale-95 transition">Grayscale</button>
+                <button type="button" data-filter="pink" class="option-btn px-2 py-2 rounded-xl text-sm font-medium bg-pink-50 hover:bg-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-400 active:scale-95 transition">Pink</button>
+                <button type="button" data-filter="sunset" class="option-btn px-2 py-2 rounded-xl text-sm font-medium bg-pink-50 hover:bg-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-400 active:scale-95 transition">Sunset</button>
+              </div>
+            </div>
+
+            <!-- Pilihan frame -->
+            <div>
+              <h3 class="font-display text-lg font-semibold mb-2">Frame</h3>
+              <div id="frameOptions" class="grid grid-cols-3 gap-2">
+                <button type="button" data-frame="classic" class="option-btn selected px-2 py-2 rounded-xl text-sm font-medium bg-pink-50 hover:bg-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-400 active:scale-95 transition">Classic</button>
+                <button type="button" data-frame="polaroid" class="option-btn px-2 py-2 rounded-xl text-sm font-medium bg-pink-50 hover:bg-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-400 active:scale-95 transition">Polaroid</button>
+                <button type="button" data-frame="pink" class="option-btn px-2 py-2 rounded-xl text-sm font-medium bg-pink-50 hover:bg-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-400 active:scale-95 transition">Pink</button>
+                <button type="button" data-frame="blue" class="option-btn px-2 py-2 rounded-xl text-sm font-medium bg-pink-50 hover:bg-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-400 active:scale-95 transition">Blue</button>
+                <button type="button" data-frame="film" class="option-btn px-2 py-2 rounded-xl text-sm font-medium bg-pink-50 hover:bg-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-400 active:scale-95 transition">Film</button>
+                <button type="button" data-frame="minimal" class="option-btn px-2 py-2 rounded-xl text-sm font-medium bg-pink-50 hover:bg-pink-100 focus:outline-none focus:ring-2 focus:ring-pink-400 active:scale-95 transition">Minimal</button>
+              </div>
+            </div>
+
+            <!-- Tombol ambil foto -->
+            <button id="takePhotoBtn" type="button"
+              class="btn bg-pink-500 text-white font-bold text-lg py-3 rounded-2xl shadow-lg hover:bg-pink-600 hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-pink-300 active:scale-95 transition duration-200">
+              Take Photo
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Canvas tersembunyi: dipakai JavaScript untuk mengambil frame video -->
+      <canvas id="captureCanvas" class="hidden"></canvas>
+    </section>
+
+
+    <!-- ================= 3. HASIL PHOTO STRIP ================= -->
+    <!-- Disembunyikan sampai 4 foto selesai (class "hidden" dilepas oleh JavaScript) -->
+    <section id="result" class="hidden container py-5">
+      <div class="card border-0 rounded-3xl shadow-xl p-4 md:p-5 mx-auto max-w-2xl text-center">
+        <h2 class="font-display text-4xl font-bold text-pink-500 mb-1">Your photo strip</h2>
+        <p class="text-violet-900/70 mb-4">Hasil fotomu sudah jadi. Unduh atau ulangi sesinya.</p>
+
+        <!-- Canvas hasil photo strip -->
+        <div class="flex justify-center mb-4">
+          <canvas id="stripCanvas" class="max-w-full h-auto rounded-xl shadow-lg" aria-label="Hasil photo strip SNAPLY"></canvas>
+        </div>
+
+        <p id="resultMessage" class="hidden mb-3 px-4 py-3 rounded-xl text-sm font-medium bg-red-100 text-red-700" role="alert"></p>
+
+        <div class="flex flex-col md:flex-row gap-3 justify-center">
+          <button id="downloadBtn" type="button"
+            class="btn bg-pink-500 text-white font-bold px-6 py-3 rounded-2xl hover:bg-pink-600 focus:outline-none focus:ring-4 focus:ring-pink-300 active:scale-95 transition">
+            Download Photo
+          </button>
+          <button id="retakeBtn" type="button"
+            class="btn bg-violet-600 text-white font-bold px-6 py-3 rounded-2xl hover:bg-violet-700 focus:outline-none focus:ring-4 focus:ring-violet-300 active:scale-95 transition">
+            Retake
+          </button>
+          <button id="newSessionBtn" type="button"
+            class="btn bg-yellow-200 text-violet-900 font-bold px-6 py-3 rounded-2xl hover:bg-yellow-300 focus:outline-none focus:ring-4 focus:ring-yellow-300 active:scale-95 transition">
+            New Session
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="container py-4 text-center text-sm text-violet-900/60">
+    <p>SNAPLY &copy; 2026. Tugas Pemrograman Berbasis Web.</p>
+  </footer>
+
+  <!-- JavaScript buatan sendiri (dibuat di tahap LANJUT JS) -->
+  <script src="script.js"></script>
+</body>
+</html>
