@@ -1,13 +1,6 @@
-// =====================================================
-// SNAPLY - script.js
-// Alur: nyalakan kamera -> pilih timer/filter/frame ->
-//       Take Photo (countdown -> ambil foto) x4 -> photo strip
-// =====================================================
 
 
-// ---------- 1. DATA TETAP ----------
-
-const TOTAL_PHOTOS = 4;      // jumlah foto dalam satu sesi
+const TOTAL_PHOTOS = 4;       // jumlah foto dalam satu sesi
 const PHOTO_WIDTH = 800;     // ukuran foto hasil jepretan (rasio 4:3)
 const PHOTO_HEIGHT = 600;
 
@@ -20,7 +13,18 @@ const FILTERS = {
   vintage: "sepia(0.6) contrast(1.1) brightness(0.95) saturate(0.9)",
   grayscale: "grayscale(1)",
   pink: "sepia(0.3) hue-rotate(300deg) saturate(1.6) brightness(1.05)",
-  sunset: "sepia(0.4) saturate(1.8) hue-rotate(-20deg) contrast(1.05)"
+  sunset: "sepia(0.4) saturate(1.8) hue-rotate(-20deg) contrast(1.05)",
+
+  // Filter bergaya tren IG / TikTok (pendekatan memakai CSS filter)
+  soft: "brightness(1.1) contrast(0.92) saturate(1.1)",                        // clean girl / soft glow
+  y2k: "saturate(1.7) contrast(1.15) hue-rotate(-10deg) brightness(1.05)",     // warna ngejreng ala Y2K
+  disposable: "contrast(1.25) saturate(1.3) sepia(0.15) brightness(1.05)",     // kamera disposable
+  golden: "sepia(0.3) saturate(1.5) brightness(1.1) hue-rotate(-15deg)",       // golden hour
+  moody: "contrast(1.2) brightness(0.85) saturate(0.8) sepia(0.15)",           // moody / dark academia
+  noir: "grayscale(1) contrast(1.4) brightness(0.9)",                          // hitam putih tegas
+  dreamy: "brightness(1.15) contrast(0.9) saturate(1.2) blur(0.6px)",          // dreamy blur
+  peachy: "sepia(0.25) saturate(1.4) hue-rotate(-25deg) brightness(1.1)",      // peach tone
+  matcha: "sepia(0.3) hue-rotate(50deg) saturate(1.2) brightness(1.05)"        // matcha green
 };
 
 // Daftar frame. Dipakai saat menggambar photo strip di canvas.
@@ -77,6 +81,7 @@ const stripCanvas = document.getElementById("stripCanvas");
 const resultSection = document.getElementById("result");
 
 
+
 // ---------- 3. VARIABEL KONDISI ----------
 
 let stream = null;            // data kamera (null = kamera belum menyala)
@@ -85,19 +90,33 @@ let selectedTimer = 3;        // detik
 let selectedFilter = "normal";
 let selectedFrame = "classic";
 let isBusy = false;           // true saat countdown berjalan
+let retakeIndex = null;       // nomor foto yang sedang diulang (null = tidak ada)
 
 
 // ---------- 4. PESAN & STATUS ----------
 
 // Menampilkan pesan di kotak tertentu. type: "error", "info", atau "success"
+// Warna Tailwind untuk tiap jenis pesan
+const MESSAGE_COLORS = {
+  error: ["bg-red-100", "text-red-700"],
+  info: ["bg-sky-100", "text-sky-700"],
+  success: ["bg-emerald-100", "text-emerald-700"]
+};
+const ALL_COLORS = ["bg-red-100", "text-red-700", "bg-sky-100", "text-sky-700", "bg-emerald-100", "text-emerald-700", "bg-gray-200", "text-gray-700"];
+
+// Menghapus semua class warna lama, lalu memasang warna baru
+function setColors(element, colors) {
+  ALL_COLORS.forEach(function (name) {
+    element.classList.remove(name);
+  });
+  element.classList.add(colors[0], colors[1]);
+}
+
+// Menampilkan pesan di kotak tertentu. type: "error", "info", atau "success"
 function showMessage(box, text, type) {
   box.textContent = text;
-  box.classList.remove("hidden", "message-info", "message-success");
-  if (type === "info") {
-    box.classList.add("message-info");
-  } else if (type === "success") {
-    box.classList.add("message-success");
-  }
+  box.classList.remove("hidden");
+  setColors(box, MESSAGE_COLORS[type]);
 }
 
 function hideMessages() {
@@ -107,13 +126,13 @@ function hideMessages() {
 
 // Mengubah label status kamera. state: "off", "ready", atau "error"
 function setCameraStatus(text, state) {
+  const colors = {
+    off: ["bg-gray-200", "text-gray-700"],
+    ready: ["bg-emerald-100", "text-emerald-700"],
+    error: ["bg-red-100", "text-red-700"]
+  };
   cameraStatus.textContent = text;
-  cameraStatus.classList.remove("status-ready", "status-error");
-  if (state === "ready") {
-    cameraStatus.classList.add("status-ready");
-  } else if (state === "error") {
-    cameraStatus.classList.add("status-error");
-  }
+  setColors(cameraStatus, colors[state]);
 }
 
 
@@ -219,14 +238,12 @@ function wait(milliseconds) {
 // Menampilkan satu angka/kata countdown dengan animasi
 function showCountdownText(text, isWord) {
   countdown.textContent = text;
-  // Kata "CHEESE!" dibuat lebih kecil agar muat di layar
-  countdown.style.fontSize = isWord ? "clamp(2.5rem, 9vw, 5rem)" : "";
-  countdown.classList.remove("hidden");
-
-  // Trik agar animasi bisa diulang: lepas class, paksa browser menghitung ulang, pasang lagi
-  countdown.classList.remove("countdown-pop");
-  void countdown.offsetWidth;
-  countdown.classList.add("countdown-pop");
+  countdown.classList.remove("hidden", "text-8xl", "text-5xl");
+  // Angka besar, kata "CHEESE!" lebih kecil agar muat. Mulai dari besar + transparan...
+  countdown.classList.add(isWord ? "text-5xl" : "text-8xl", "scale-150", "opacity-0");
+  void countdown.offsetWidth;   // paksa browser menghitung ulang agar transisi berjalan
+  // ...lalu transition-all membuatnya mengecil dan muncul
+  countdown.classList.remove("scale-150", "opacity-0");
 }
 
 function hideCountdown() {
@@ -249,9 +266,11 @@ async function runCountdown() {
 
 // Efek kilat putih
 function showFlash() {
-  flash.classList.add("flash-on");
+  flash.classList.remove("opacity-0");
+  flash.classList.add("opacity-100");
   setTimeout(function () {
-    flash.classList.remove("flash-on");
+    flash.classList.remove("opacity-100");
+    flash.classList.add("opacity-0");
   }, 150);
 }
 
@@ -261,23 +280,87 @@ function updateProgress() {
   progressBar.style.width = (photos.length / TOTAL_PHOTOS) * 100 + "%";
 }
 
-// Menaruh foto kecil di slot thumbnail
-function addThumbnail(dataUrl) {
-  const slot = thumbnails.children[photos.length - 1];
+// Menaruh foto kecil di slot nomor "index" (0 = foto 1, dst.)
+function setThumbnail(index, dataUrl) {
+  const slot = thumbnails.children[index];
   const image = document.createElement("img");
   image.src = dataUrl;
-  image.alt = "Photo " + photos.length;
+  image.alt = "Photo " + (index + 1);
   slot.textContent = "";
   slot.appendChild(image);
+
+  // Slot yang sudah berisi foto bisa diklik untuk retake
+  slot.setAttribute("role", "button");
+  slot.setAttribute("tabindex", "0");
+  slot.setAttribute("aria-label", "Retake photo " + (index + 1));
+
+  // Lepas class lalu pasang lagi agar animasi muncul ulang
+  slot.classList.remove("filled", "retaking");
+  void slot.offsetWidth;
   slot.classList.add("filled");
 }
 
 // Mengosongkan semua slot thumbnail
 function clearThumbnails() {
   for (let i = 0; i < thumbnails.children.length; i++) {
-    thumbnails.children[i].textContent = i + 1;
-    thumbnails.children[i].classList.remove("filled");
+    const slot = thumbnails.children[i];
+    slot.textContent = i + 1;
+    slot.classList.remove("filled", "retaking");
+    slot.removeAttribute("role");
+    slot.removeAttribute("tabindex");
+    slot.removeAttribute("aria-label");
   }
+}
+
+// Teks tombol berubah saat sedang mengulang satu foto
+function updateTakeButtonText() {
+  if (retakeIndex !== null) {
+    takePhotoBtn.textContent = "Retake Photo " + (retakeIndex + 1);
+  } else {
+    takePhotoBtn.textContent = "Take Photo";
+  }
+}
+
+// Membatalkan mode retake (klik thumbnail yang sama sekali lagi)
+function cancelRetakePhoto() {
+  retakeIndex = null;
+  for (let i = 0; i < thumbnails.children.length; i++) {
+    thumbnails.children[i].classList.remove("retaking");
+  }
+  updateTakeButtonText();
+  hideMessages();
+
+  // Jika 4 foto sudah lengkap, tampilkan lagi hasilnya
+  if (photos.length === TOTAL_PHOTOS) {
+    resultSection.classList.remove("hidden");
+    takePhotoBtn.disabled = true;
+  }
+}
+
+// Dipanggil saat thumbnail diklik: pilih foto yang mau diulang
+function selectPhotoToRetake(index) {
+  // Abaikan jika countdown berjalan atau slot masih kosong
+  if (isBusy || index >= photos.length) {
+    return;
+  }
+
+  // Klik foto yang sama lagi = batal
+  if (retakeIndex === index) {
+    cancelRetakePhoto();
+    return;
+  }
+
+  retakeIndex = index;
+  for (let i = 0; i < thumbnails.children.length; i++) {
+    thumbnails.children[i].classList.remove("retaking");
+  }
+  thumbnails.children[index].classList.add("retaking");
+
+  updateTakeButtonText();
+  takePhotoBtn.disabled = false;
+  resultSection.classList.add("hidden");
+  showMessage(messageBox, "Retaking photo " + (index + 1) + ". Press the button when you are ready. Tap the photo again to cancel.", "info");
+  scrollToPhotobooth();
 }
 
 // Mengambil satu frame dari video lalu menyimpannya
@@ -307,9 +390,21 @@ function capturePhoto() {
   ctx.filter = "none";
 
   // Simpan hasilnya sebagai teks gambar (dataURL)
-  photos.push(captureCanvas.toDataURL("image/jpeg", 0.92));
-  addThumbnail(photos[photos.length - 1]);
+  const dataUrl = captureCanvas.toDataURL("image/jpeg", 0.92);
+
+  if (retakeIndex !== null) {
+    // Mode retake: ganti foto lama di posisi yang sama
+    photos[retakeIndex] = dataUrl;
+    setThumbnail(retakeIndex, dataUrl);
+    retakeIndex = null;
+  } else {
+    // Mode biasa: tambah foto baru di urutan berikutnya
+    photos.push(dataUrl);
+    setThumbnail(photos.length - 1, dataUrl);
+  }
+
   updateProgress();
+  updateTakeButtonText();
 }
 
 // Dijalankan saat tombol Take Photo ditekan
@@ -327,8 +422,8 @@ async function handleTakePhoto() {
     showMessage(messageBox, "The camera is still loading. Please wait a moment.", "info");
     return;
   }
-  if (photos.length >= TOTAL_PHOTOS) {
-    showMessage(messageBox, "You already have 4 photos. Press Retake or New Session.", "info");
+  if (photos.length >= TOTAL_PHOTOS && retakeIndex === null) {
+    showMessage(messageBox, "You already have all " + TOTAL_PHOTOS + " photos. Press Retake or New Session.", "info");
     return;
   }
 
@@ -438,6 +533,8 @@ function drawFooter(ctx, frame, height) {
 // Menggabungkan semua bagian menjadi satu photo strip
 async function drawPhotoStrip() {
   const images = await Promise.all(photos.map(loadImage));
+
+
   const frame = FRAMES[selectedFrame];
   const height = STRIP.header + TOTAL_PHOTOS * STRIP.photoH + (TOTAL_PHOTOS - 1) * STRIP.gap + STRIP.footer;
 
@@ -473,7 +570,7 @@ function downloadStrip() {
   hideMessages();
 
   if (photos.length < TOTAL_PHOTOS) {
-    showMessage(messageBox, "Please finish all 4 photos first.", "info");
+    showMessage(messageBox, "Please finish all " + TOTAL_PHOTOS + " photos first.", "info");
     return;
   }
 
@@ -491,12 +588,14 @@ function downloadStrip() {
 // Menghapus foto dan progress (dipakai Retake dan New Session)
 function clearPhotos() {
   photos = [];
+  retakeIndex = null;
   isBusy = false;
   takePhotoBtn.disabled = false;
   hideMessages();
   hideCountdown();
   clearThumbnails();
   updateProgress();
+  updateTakeButtonText();
   resultSection.classList.add("hidden");
 }
 
@@ -527,6 +626,40 @@ function newSession() {
 }
 
 
+// Ikon kecil untuk preview tombol frame dasar
+const FRAME_ICONS = { classic: "🖼️", polaroid: "📷", pink: "💗", blue: "💙", film: "🎞️", minimal: "⬜" };
+
+// ---------- 10B. PREVIEW PADA TOMBOL ----------
+
+// Memberi kotak kecil berwarna (swatch) di dalam tombol filter dan frame
+function addPreviews() {
+  filterOptions.querySelectorAll("button").forEach(function (button) {
+    const swatch = document.createElement("span");
+    swatch.className = "swatch";
+    swatch.style.background = "linear-gradient(135deg, #fca5a5, #fde68a, #93c5fd)";
+    swatch.style.filter = FILTERS[button.getAttribute("data-filter")];  // filter yang sama dengan kamera
+    button.prepend(swatch);
+  });
+
+  frameOptions.querySelectorAll("button").forEach(function (button) {
+    const name = button.getAttribute("data-frame");
+    const frame = FRAMES[name];
+    const colors = frame.patternColors || [frame.bg, frame.bg2];
+    const swatch = document.createElement("span");
+    swatch.className = "swatch";
+    swatch.style.background = "linear-gradient(135deg, " + colors.join(", ") + ")";
+    swatch.style.borderColor = frame.text;
+    swatch.textContent = FRAME_ICONS[name] || "";
+    button.prepend(swatch);
+  });
+}
+
+// Tanggal di gambar hero ikut tanggal hari ini
+function showHeroDate() {
+  document.getElementById("heroDate").textContent = getTodayText();
+}
+
+
 // ---------- 11. PASANG EVENT ----------
 
 startBtn.addEventListener("click", scrollToPhotobooth);
@@ -540,5 +673,20 @@ setupOptionGroup(timerOptions, "data-timer", chooseTimer);
 setupOptionGroup(filterOptions, "data-filter", chooseFilter);
 setupOptionGroup(frameOptions, "data-frame", chooseFrame);
 
+// Klik (atau Enter / Spasi) pada thumbnail = ulangi foto itu
+for (let i = 0; i < thumbnails.children.length; i++) {
+  thumbnails.children[i].addEventListener("click", function () {
+    selectPhotoToRetake(i);
+  });
+  thumbnails.children[i].addEventListener("keydown", function (event) {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      selectPhotoToRetake(i);
+    }
+  });
+}
+
 // Tampilan awal
+addPreviews();
+showHeroDate();
 updateProgress();

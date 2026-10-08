@@ -1,235 +1,66 @@
-/* =====================================================
-   SNAPLY - style.css
-   Tugas file ini:
-   - menambah hal yang TIDAK bisa dibuat Tailwind CDN langsung
-     (font khusus, animasi, state "selected")
-   - memperbaiki bentrok kecil antara Bootstrap dan Tailwind
-   ===================================================== */
 
+html { scroll-behavior: smooth; }
+body { overflow-x: hidden; }
 
-/* ---------- 1. DASAR ---------- */
-
-/* Scroll halus saat tombol Start Photobooth ditekan */
-html {
-  scroll-behavior: smooth;
+/* Baris pilihan filter / frame yang bisa digeser ke samping */
+.scroll-row {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding: 0.25rem 0.25rem 0.6rem;
+}
+.scroll-row > button {
+  flex: 0 0 auto;
+  min-width: 4.6rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
 }
 
-/* Mencegah scroll ke samping di HP */
-body {
-  overflow-x: hidden;
-  font-family: "DM Sans", sans-serif;
+/* Kotak preview kecil di dalam tombol filter / frame */
+.swatch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 0.75rem;
+  border: 2px solid #ffffff;
+  font-size: 1.2rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
-/* Tailwind tidak punya class font-display / font-body,
-   jadi kita buat sendiri supaya bisa dipakai di HTML */
-.font-display {
-  font-family: "Fredoka", sans-serif;
-}
-
-.font-body {
-  font-family: "DM Sans", sans-serif;
-}
-
-/* Link tanpa garis bawah (bawaan Bootstrap ada garis bawah) */
-a {
-  text-decoration: none;
-}
-
-/* Warna teks saat diblok */
-::selection {
-  background: #f9a8d4;
-  color: #2e1065;
-}
-
-
-/* ---------- 2. PERBAIKAN BENTROK BOOTSTRAP vs TAILWIND ---------- */
-
-/* Masalah: class .btn milik Bootstrap memakai variabel --bs-btn-*
-   untuk warna saat hover / ditekan. Karena kita tidak memakai
-   btn-primary dll., variabel itu kosong dan tombol bisa jadi
-   transparan saat ditekan.
-   Solusi: isi variabel Bootstrap dengan warna kita sendiri. */
-
-/* Tombol pink */
-.btn.bg-pink-500 {
-  --bs-btn-bg: #ec4899;
-  --bs-btn-color: #ffffff;
-  --bs-btn-hover-bg: #db2777;
-  --bs-btn-hover-color: #ffffff;
-  --bs-btn-active-bg: #be185d;
-  --bs-btn-active-color: #ffffff;
-}
-
-/* Tombol ungu */
-.btn.bg-violet-600 {
-  --bs-btn-bg: #7c3aed;
-  --bs-btn-color: #ffffff;
-  --bs-btn-hover-bg: #6d28d9;
-  --bs-btn-hover-color: #ffffff;
-  --bs-btn-active-bg: #5b21b6;
-  --bs-btn-active-color: #ffffff;
-}
-
-/* Tombol kuning */
-.btn.bg-yellow-200 {
-  --bs-btn-bg: #fef08a;
-  --bs-btn-color: #2e1065;
-  --bs-btn-hover-bg: #fde047;
-  --bs-btn-hover-color: #2e1065;
-  --bs-btn-active-bg: #facc15;
-  --bs-btn-active-color: #2e1065;
-}
-
-/* Tombol yang sedang nonaktif (misalnya Take Photo saat countdown) */
-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-
-/* ---------- 3. KAMERA ---------- */
-
-/* Video dicerminkan seperti bercermin.
-   Catatan: canvas di JavaScript juga harus dicerminkan
-   supaya hasil foto sama dengan yang terlihat di preview. */
-#video {
-  transform: scaleX(-1);
-}
-
-/* Warna label status kamera.
-   Default (Camera Off) sudah abu-abu dari HTML.
-   JavaScript tinggal menambah salah satu class di bawah. */
-#cameraStatus {
-  transition: background-color 0.3s, color 0.3s;
-}
-
-#cameraStatus.status-ready {
-  background-color: #d1fae5;
-  color: #047857;
-}
-
-#cameraStatus.status-error {
-  background-color: #fee2e2;
-  color: #b91c1c;
-}
-
-
-/* ---------- 4. COUNTDOWN ---------- */
-
-/* Angka besar di tengah kamera */
-#countdown {
-  font-family: "Fredoka", sans-serif;
-  font-size: clamp(4rem, 20vw, 9rem);
-  font-weight: 700;
-  color: #ffffff;
-  text-shadow: 0 6px 24px rgba(236, 72, 153, 0.8);
-  background: rgba(46, 16, 101, 0.35);
-}
-
-/* Animasi "pop": angka muncul besar lalu mengecil.
-   JavaScript menambah class ini setiap angka berganti. */
-.countdown-pop {
-  animation: pop 0.6s ease-out;
-}
-
-@keyframes pop {
-  0% {
-    transform: scale(1.6);
-    opacity: 0;
-  }
-  60% {
-    transform: scale(0.95);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(1);
-  }
-}
-
-
-/* ---------- 5. FLASH ---------- */
-
-/* Di HTML, flash memakai class opacity-0.
-   Bootstrap juga punya .opacity-0 dengan !important,
-   jadi kita pakai !important juga agar flash bisa menyala. */
-#flash.flash-on {
-  opacity: 1 !important;
-}
-
-
-/* ---------- 6. PESAN ---------- */
-
-/* Default pesan = merah (error). Class ini untuk pesan biasa. */
-#messageBox.message-info,
-#resultMessage.message-info {
-  background-color: #e0f2fe;
-  color: #0369a1;
-}
-
-#messageBox.message-success,
-#resultMessage.message-success {
-  background-color: #d1fae5;
-  color: #047857;
-}
-
-
-/* ---------- 7. PILIHAN TIMER / FILTER / FRAME ---------- */
-
-.option-btn {
-  border: 2px solid transparent;
-}
-
-/* Pilihan yang sedang aktif.
-   Selector dibuat lebih spesifik (button.option-btn.selected)
-   supaya warnanya tidak tertimpa hover:bg-pink-100 dari Tailwind. */
+/* Pilihan yang aktif. Selector dibuat lebih spesifik agar menang dari hover Tailwind */
 button.option-btn.selected,
 button.option-btn.selected:hover {
   background-color: #ec4899;
   color: #ffffff;
-  border-color: #be185d;
   box-shadow: 0 6px 14px rgba(236, 72, 153, 0.35);
   transform: translateY(-2px);
 }
 
-
-/* ---------- 8. THUMBNAIL FOTO ---------- */
-
-/* Slot yang sudah berisi foto */
+/* Thumbnail foto */
 .thumb-slot.filled {
   border-style: solid;
   border-color: #ec4899;
+  cursor: pointer;
   animation: thumbIn 0.4s ease-out;
 }
-
-/* Gambar di dalam slot dibuat memenuhi kotak */
-.thumb-slot img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.thumb-slot.filled:hover { transform: scale(1.05); }
+.thumb-slot.retaking {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.35);
 }
+.thumb-slot img { width: 100%; height: 100%; object-fit: cover; }
+.thumb-slot:focus-visible { outline: 3px solid #7c3aed; outline-offset: 2px; }
 
 @keyframes thumbIn {
-  from {
-    transform: scale(0.6);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
+  from { transform: scale(0.6); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }
 
-
-/* ---------- 9. AKSESIBILITAS ---------- */
-
-/* Jika pengguna mematikan animasi di perangkatnya, hormati pilihan itu */
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
-
-  .countdown-pop,
-  .thumb-slot.filled {
-    animation: none;
-  }
+  html { scroll-behavior: auto; }
+  .thumb-slot.filled { animation: none; }
 }
